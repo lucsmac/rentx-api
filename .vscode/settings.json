@@ -1,0 +1,16 @@
+{
+  "cSpell.ignoreWords": [
+    "cli",
+    "dev",
+    "modules",
+    "node",
+    "paths",
+    "r",
+    "register",
+    "respawn",
+    "ts",
+    "tsconfig",
+    "tsyringe",
+    "typeorm"
+  ]
+}
