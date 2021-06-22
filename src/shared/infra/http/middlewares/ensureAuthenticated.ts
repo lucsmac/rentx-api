@@ -2,7 +2,9 @@ import { NextFunction, Request, Response } from "express";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { verify } from "jsonwebtoken";
 
+import auth from "@config/auth";
 import { UsersRepository } from "@modules/accounts/infra/typeorm/repositories/UsersRepository";
+import { UsersTokensRepository } from "@modules/accounts/infra/typeorm/repositories/UsersTokensRepository";
 import { AppError } from "@shared/errors/AppError";
 // eslint-disable-next-line import/no-extraneous-dependencies
 
@@ -16,17 +18,22 @@ export async function ensureAuthenticated(
   next: NextFunction
 ): Promise<void> {
   const authHeader = request.headers.authorization;
+  const userTokensRepository = new UsersTokensRepository();
+
   if (!authHeader) throw new AppError("Token missing", 401);
 
   const [, token] = authHeader.split(" ");
   try {
     const { sub: user_id } = verify(
       token,
-      "3af9acebff4cd77891a0baf0aa712db4"
+      auth.secret_refresh_token
     ) as IPayload;
 
-    const usersRepository = new UsersRepository();
-    const user = usersRepository.findById(user_id);
+    const user = await userTokensRepository.findByUserIdAndRefreshToken(
+      user_id,
+      token
+    );
+
     if (!user) throw new AppError("User doesn't not exist", 401);
 
     request.user = {
